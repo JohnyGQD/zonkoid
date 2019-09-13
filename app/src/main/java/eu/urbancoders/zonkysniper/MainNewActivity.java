@@ -1,28 +1,32 @@
 package eu.urbancoders.zonkysniper;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.IdRes;
-import android.support.design.internal.NavigationSubMenu;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.IdRes;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -32,16 +36,13 @@ import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.appyvet.materialrangebar.RangeBar;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -50,8 +51,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import eu.urbancoders.zonkysniper.core.Constants;
 import eu.urbancoders.zonkysniper.core.ZSViewActivity;
@@ -63,6 +62,7 @@ import eu.urbancoders.zonkysniper.events.GetInvestor;
 import eu.urbancoders.zonkysniper.events.GetInvestorRestrictions;
 import eu.urbancoders.zonkysniper.events.GetWallet;
 import eu.urbancoders.zonkysniper.events.ReloadMarket;
+import eu.urbancoders.zonkysniper.events.UpdateMandatoryWarning;
 import eu.urbancoders.zonkysniper.messaging.MessagingActivity;
 import eu.urbancoders.zonkysniper.portfolio.PortfolioActivity;
 import eu.urbancoders.zonkysniper.wallet.WalletActivity;
@@ -293,14 +293,20 @@ public class MainNewActivity extends ZSViewActivity {
                 sp.getBoolean(Constants.SHARED_PREF_SHOW_RESERVED, true)
         );
 
+        ((CheckBox) dialog.findViewById(R.id.AAAAAA))
+                .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.AAAAAA.name(), false));
         ((CheckBox) dialog.findViewById(R.id.AAAAA))
                 .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.AAAAA.name(), false));
         ((CheckBox) dialog.findViewById(R.id.AAAA))
                 .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.AAAA.name(), false));
         ((CheckBox) dialog.findViewById(R.id.AAA))
                 .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.AAA.name(), false));
+        ((CheckBox) dialog.findViewById(R.id.AAE))
+                .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.AAE.name(), false));
         ((CheckBox) dialog.findViewById(R.id.AA))
                 .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.AA.name(), false));
+        ((CheckBox) dialog.findViewById(R.id.AE))
+                .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.AE.name(), false));
         ((CheckBox) dialog.findViewById(R.id.A))
                 .setChecked(sp.getBoolean(Constants.FILTER_MARKETPLACE_RATINGS + Rating.A.name(), false));
         ((CheckBox) dialog.findViewById(R.id.B))
@@ -436,6 +442,8 @@ public class MainNewActivity extends ZSViewActivity {
         });
 
         drawerLayout = findViewById(R.id.drawer_layout);
+        final ImageView updateIcon = ((NavigationView)drawerLayout.findViewById(R.id.nav_view))
+                .getHeaderView(0).findViewById(R.id.updateWarning);
 
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close) {
 
@@ -446,7 +454,35 @@ public class MainNewActivity extends ZSViewActivity {
 
             @Override
             public void onDrawerOpened(View v){
-                    super.onDrawerOpened(v);
+                super.onDrawerOpened(v);
+                final String newVersion = sp.getString(Constants.UPDATE_AVAILABLE_VERSION, null);
+                if(newVersion != null) {
+                    updateIcon.setVisibility(View.VISIBLE);
+                    updateIcon.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            showMandatoryUpgradeWarning(new UpdateMandatoryWarning.Request(newVersion));
+                        }
+                    });
+                    animateUpdateWarning();
+                }
+            }
+
+            public void animateUpdateWarning() {
+                int colorFrom = getResources().getColor(R.color.white);
+                int colorTo = getResources().getColor(R.color.greyLight);
+                ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+                colorAnimation.setDuration(500); // milliseconds
+                colorAnimation.setRepeatCount(ValueAnimator.INFINITE);
+                colorAnimation.setRepeatMode(ValueAnimator.REVERSE);
+                colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animator) {
+                        updateIcon.setColorFilter((int) animator.getAnimatedValue(), PorterDuff.Mode.SRC_ATOP);
+                    }
+                });
+                colorAnimation.start();
             }
         };
         drawerLayout.addDrawerListener(drawerToggle);
@@ -667,6 +703,9 @@ public class MainNewActivity extends ZSViewActivity {
      * Zobrazit uvodni napovedu
      */
     public void showCoachMark() {
+
+        if(true) // TODO v teto verzi je vypnuty coachmark
+            return;
 
         // rozhodnout, jestli zobrazim nebo jestli uz videl
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());

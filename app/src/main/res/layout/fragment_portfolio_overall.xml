@@ -5,7 +5,7 @@
                 tools:context="eu.urbancoders.zonkysniper.portfolio.PortfolioCurrentFragment"
 >
 
-    <android.support.v4.widget.NestedScrollView
+    <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -47,7 +47,7 @@
                             android:text="0 Kč"
                             android:textStyle="bold"
                             android:textSize="20sp"
-                            android:textColor="@color/AAA"
+                            android:textColor="@color/AA"
                     />
                     <TextView
                             android:layout_width="wrap_content"
@@ -100,7 +100,7 @@
                             android:text="0 Kč"
                             android:textStyle="bold"
                             android:textSize="20sp"
-                            android:textColor="@color/AAA"
+                            android:textColor="@color/AA"
                     />
 
                     <TextView
@@ -177,5 +177,5 @@
 
         </RelativeLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
 </RelativeLayout>

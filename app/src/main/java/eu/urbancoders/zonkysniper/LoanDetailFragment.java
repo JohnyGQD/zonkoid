@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
+import androidx.annotation.Nullable;
+import com.google.android.material.snackbar.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -260,7 +260,7 @@ public class LoanDetailFragment extends ZSFragment {
         }
 
         // vybarvena urokova sazba
-        interestRate.setText(Rating.getDesc(loan.getRating()) + " | " + new DecimalFormat("#.##").format(loan.getInterestRate() * 100) + "%");
+        interestRate.setText(new DecimalFormat("#.##").format(loan.getInterestRate() * 100) + "%");
         interestRate.setTextColor(Color.parseColor(Rating.getColor(loan.getRating())));
 
         // pojisteno?

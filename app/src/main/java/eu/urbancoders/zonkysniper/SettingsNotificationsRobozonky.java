@@ -13,14 +13,19 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.preference.SwitchPreference;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.ActionBar;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.appcompat.app.ActionBar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+
 import eu.urbancoders.zonkysniper.core.AppCompatPreferenceActivity;
 import eu.urbancoders.zonkysniper.core.Constants;
 import eu.urbancoders.zonkysniper.core.ZonkySniperApplication;
@@ -125,10 +130,15 @@ public class SettingsNotificationsRobozonky extends AppCompatPreferenceActivity 
                                 ZonkySniperApplication.getInstance().getUsername(),
                                 Constants.ClientApps.ROBOZONKY));
                         // pro jistotu jeste updatuj FCM token
-                        String token = FirebaseInstanceId.getInstance().getToken();
-                        EventBus.getDefault().post(new FcmTokenRegistration.Request(
-                                ZonkySniperApplication.getInstance().getUsername(),
-                                token));
+                        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+                            @Override
+                            public void onSuccess(InstanceIdResult instanceIdResult) {
+                                String newToken = instanceIdResult.getToken();
+                                EventBus.getDefault().post(new FcmTokenRegistration.Request(
+                                        ZonkySniperApplication.getInstance().getUsername(),
+                                        newToken));
+                            }
+                        });
                     }
                 } else if(stringValue.equalsIgnoreCase("false") && userCode > -1 ) {
                     EventBus.getDefault().post(new UnregisterThirdpartyNotif.Request(

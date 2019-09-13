@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -121,7 +121,7 @@ public class InvestingActivity extends ZSViewActivity {
         header.setTextColor(Color.parseColor(Rating.getColor(loan.getRating())));
 
         // vybarvena urokova sazba
-        interestRate.setText(Rating.getDesc(loan.getRating()) + " | " + new DecimalFormat("#.##").format(loan.getInterestRate() * 100) + "%");
+        interestRate.setText(new DecimalFormat("#.##").format(loan.getInterestRate() * 100) + "%");
         interestRate.setTextColor(Color.parseColor(Rating.getColor(loan.getRating())));
 
         toolbar.setTitle(loan.getName());

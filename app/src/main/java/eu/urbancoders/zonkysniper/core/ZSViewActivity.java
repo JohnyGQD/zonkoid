@@ -2,27 +2,28 @@ package eu.urbancoders.zonkysniper.core;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.solovyev.android.checkout.Billing;
 import org.solovyev.android.checkout.Checkout;
 import org.solovyev.android.checkout.Inventory;
 import org.solovyev.android.checkout.ProductTypes;
@@ -36,6 +37,7 @@ import javax.annotation.Nonnull;
 import eu.urbancoders.zonkysniper.R;
 import eu.urbancoders.zonkysniper.events.ShowHideAd;
 import eu.urbancoders.zonkysniper.events.UnresolvableError;
+import eu.urbancoders.zonkysniper.events.UpdateMandatoryWarning;
 import eu.urbancoders.zonkysniper.wallet.WalletActivity;
 
 
@@ -101,6 +103,10 @@ public abstract class ZSViewActivity extends AppCompatActivity {
      * @param text
      */
     public void whiteMessage(View v, String text) {
+        whiteMessage(v, text, null, null);
+    }
+
+    public void whiteMessage(View v, String text, @Nullable final Intent doAction, @Nullable String doActionLabel) {
         final Dialog dialog = new Dialog(v.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -121,6 +127,25 @@ public abstract class ZSViewActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
+
+        if(doAction != null) {
+            Button extraActionButton = dialog.findViewById(R.id.extraActionButton);
+            extraActionButton.setText(doActionLabel);
+            extraActionButton.setVisibility(View.VISIBLE);
+            extraActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(doAction != null) {
+                        try {
+                            startActivity(doAction);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Failed to start activity " + doAction.getAction(), e);
+                        }
+                    }
+                    dialog.dismiss();
+                }
+            });
+        }
 
         dialog.show();
     }
@@ -342,4 +367,25 @@ public abstract class ZSViewActivity extends AppCompatActivity {
             mAdView.loadAd(ZonkySniperApplication.getInstance().getAdRequest());
         }
     }
+
+    /**
+     * Zobrazit warning kvuli stare verzi
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void showMandatoryUpgradeWarning(UpdateMandatoryWarning.Request evt) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Intent upgrade = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
+//      Intent upgrade = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName()));
+        if(sp.getBoolean(Constants.UPDATE_IS_MANDATORY, false)) {
+            redWarning(getWindow().getDecorView().getRootView(),
+                    "Používáte příliš starou verzi, je nutné aktualizovat na verzi "+evt.getVersion(),
+                    upgrade, "Aktualizovat");
+        } else {
+            whiteMessage(getWindow().getDecorView().getRootView(),
+                    "Ke stažení je nová verze "+evt.getVersion()+". Doporučujeme aktualizovat.",
+                    upgrade, "Aktualizovat");
+        }
+    }
+
+
 }

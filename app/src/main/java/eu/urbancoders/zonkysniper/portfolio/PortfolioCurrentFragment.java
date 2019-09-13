@@ -2,8 +2,8 @@ package eu.urbancoders.zonkysniper.portfolio;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentTabHost;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentTabHost;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,8 +68,7 @@ public class PortfolioCurrentFragment extends ZSFragment implements OnChartValue
     private TextView interestLeft;
     private TextView interestLeftDue;
 
-    private TextView expectedProfitability;
-    private TextView currentProfitability;
+    private TextView profitability;
 
     private TextView maxInvestmentAmount;
 
@@ -107,8 +106,7 @@ public class PortfolioCurrentFragment extends ZSFragment implements OnChartValue
         interestLeft = rootView.findViewById(R.id.interestLeft);
         interestLeftDue = rootView.findViewById(R.id.interestLeftDue);
 
-        currentProfitability = rootView.findViewById(R.id.currentProfitability);
-        expectedProfitability = rootView.findViewById(R.id.expectedProfitability);
+        profitability = rootView.findViewById(R.id.profitability);
 
         maxInvestmentAmount = rootView.findViewById(R.id.maxInvestmentAmount);
         maxInvestmentAmount.setVisibility(View.GONE);
@@ -196,16 +194,11 @@ public class PortfolioCurrentFragment extends ZSFragment implements OnChartValue
         interestLeft.setText(Constants.FORMAT_NUMBER_NO_DECIMALS.format(currentOverview.getInterestLeft()) + " Kč");
         interestLeftDue.setText(Constants.FORMAT_NUMBER_NO_DECIMALS.format(currentOverview.getInterestLeftDue()) + " Kč");
 
-        if(portfolio.getCurrentProfitability() == null) {
-            portfolio.setCurrentProfitability(0d);
-            Log.w(TAG, "getCurrentProfitability == null");
+        if(portfolio.getProfitability() == null) {
+            portfolio.setProfitability(0d);
+            Log.w(TAG, "getProfitability == null");
         }
-        currentProfitability.setText(String.format("%.2f", portfolio.getCurrentProfitability() * 100) + " %");
-        if(portfolio.getExpectedProfitability() == null) {
-            portfolio.setExpectedProfitability(0d);
-            Log.w(TAG, "getExpectedProfitability == null");
-        }
-        expectedProfitability.setText(String.format("%.2f", portfolio.getExpectedProfitability() * 100) + " %");
+        profitability.setText(String.format("%.2f", portfolio.getProfitability() * 100) + " %");
 
         riskPortfolioExplainInvested.setText(String.format(
                 getString(R.string.riskPortfolioExplainInvested),
@@ -280,7 +273,7 @@ public class PortfolioCurrentFragment extends ZSFragment implements OnChartValue
                         entries.add(
                                 new PieEntry(
                                         riskPortfolio.get(i).getTotalAmount().floatValue(),
-                                        riskPortfolio.get(i).getRating().getDesc(), riskPortfolio.get(i))
+                                        String.valueOf(riskPortfolio.get(i).getRating().getInterestRate()) + "%", riskPortfolio.get(i))
                         );
                         int color = Color.parseColor(riskPortfolio.get(i).getRating().getColor());
                         colors.add(color);
@@ -291,7 +284,7 @@ public class PortfolioCurrentFragment extends ZSFragment implements OnChartValue
                         entries.add(
                                 new PieEntry(
                                         riskPortfolio.get(i).getUnpaid().floatValue() + riskPortfolio.get(i).getDue().floatValue(),
-                                        riskPortfolio.get(i).getRating().getDesc(), riskPortfolio.get(i))
+                                        String.valueOf(riskPortfolio.get(i).getRating().getInterestRate())+"%", riskPortfolio.get(i))
                         );
                         int color = Color.parseColor(riskPortfolio.get(i).getRating().getColor());
                         colors.add(color);
@@ -302,7 +295,7 @@ public class PortfolioCurrentFragment extends ZSFragment implements OnChartValue
                         entries.add(
                                 new PieEntry(
                                         riskPortfolio.get(i).getPaid().floatValue(),
-                                        riskPortfolio.get(i).getRating().getDesc(), riskPortfolio.get(i))
+                                        String.valueOf(riskPortfolio.get(i).getRating().getInterestRate()) + "%", riskPortfolio.get(i))
                         );
                         int color = Color.parseColor(riskPortfolio.get(i).getRating().getColor());
                         colors.add(color);

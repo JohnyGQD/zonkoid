@@ -9,11 +9,12 @@ import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.TaskStackBuilder;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -35,8 +36,7 @@ import eu.urbancoders.zonkysniper.dataobjects.IncomeType;
 import eu.urbancoders.zonkysniper.dataobjects.Loan;
 import eu.urbancoders.zonkysniper.dataobjects.MyInvestment;
 import eu.urbancoders.zonkysniper.dataobjects.Photo;
-import eu.urbancoders.zonkysniper.events.GetWallet;
-import eu.urbancoders.zonkysniper.events.Invest;
+import eu.urbancoders.zonkysniper.events.FcmTokenRegistration;
 import eu.urbancoders.zonkysniper.events.InvestAuto;
 import eu.urbancoders.zonkysniper.investing.InvestingActivity;
 
@@ -166,6 +166,7 @@ public class ZonkyFirebaseMessagingService  extends FirebaseMessagingService {
         String amount = data.get("amount");
         String incomeType = data.get("incomeType");
         String region = data.get("region");
+        String activeLoansCount = data.get("activeLoansCount");
 
         // autoinvest
         boolean shouldAutoinvest = false;
@@ -212,6 +213,14 @@ public class ZonkyFirebaseMessagingService  extends FirebaseMessagingService {
                 }
             }
 
+            // je to pujcka aspon druha toho sameho dluznika?
+            if(shouldAutoinvest && sp.getBoolean(Constants.SHARED_PREF_AUTOINVEST_ONLY_WITH_PREVIOUS_LOANS, false)) {
+                if (activeLoansCount != null && Integer.valueOf(activeLoansCount) == 0) {
+                    shouldAutoinvest = false;
+                }
+            }
+
+            // TAK a TED autoinvestovat?
             if(shouldAutoinvest) {
                 investAndNotify(data, presetAutoInvestAmount);
                 return;
@@ -523,5 +532,30 @@ public class ZonkyFirebaseMessagingService  extends FirebaseMessagingService {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         // nastaveni vibrace podle clientApp (ZONKYCOMMANDER, ROBOZONKY atd.)
         return sp.getBoolean("zonkoid_notif_vibrate", false);
+    }
+
+    @Override
+    public void onNewToken(String refreshedToken) {
+        super.onNewToken(refreshedToken);
+        Log.d(TAG, "Refreshed token: " + refreshedToken);
+        // Implement this method to send any registration to your app's servers.
+        sendRegistrationToServer(refreshedToken);
+    }
+    // [END refresh_token]
+
+    /**
+     * Persist token to third-party servers.
+     * <p/>
+     * Modify this method to associate the user's FCM InstanceID token with any server-side account
+     * maintained by your application.
+     *
+     * @param token The new token.
+     */
+    private void sendRegistrationToServer(String token) {
+        Log.i(TAG, "FIRETOKEN:"+token);
+        String username = ZonkySniperApplication.getInstance().getUsername();
+        if(!username.isEmpty()) {
+            EventBus.getDefault().post(new FcmTokenRegistration.Request(username, token));
+        }
     }
 }

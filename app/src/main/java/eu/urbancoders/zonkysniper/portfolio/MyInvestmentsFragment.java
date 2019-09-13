@@ -9,13 +9,13 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -143,8 +143,12 @@ public class MyInvestmentsFragment extends ZSFragment {
         recyclerView.addOnItemTouchListener(new PortfolioActivity.RecyclerTouchListener(ZonkySniperApplication.getInstance().getApplicationContext(), recyclerView, new MainNewActivity.ClickListener() {
             @Override
             public void onClick(View view, int position) {
+                if (position == 0) {
+                    return;
+                }
+
                 try {
-                    Investment investment = investments.get(position);
+                    Investment investment = investments.get(position - 1);
                     Intent detailIntent = new Intent(getContext(), LoanDetailsActivity.class);
                     detailIntent.putExtra("loanId", investment.getLoanId());
                     startActivity(detailIntent);
@@ -299,6 +303,7 @@ public class MyInvestmentsFragment extends ZSFragment {
                 investments.clear();
             }
             investments.addAll(evt.getInvestments());
+            mAdapter.setTotalInvestmentsCount(evt.getTotalCount());
             mAdapter.notifyDataSetChanged();
             loading = true;
             swipeRefreshLayout.setRefreshing(false);
@@ -321,6 +326,7 @@ public class MyInvestmentsFragment extends ZSFragment {
     private void clearMyInvestmentsAndRefresh() {
         resetCounters();
         investments.clear();
+        mAdapter.setTotalInvestmentsCount(0);
         mAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setRefreshing(true);
         EventBus.getDefault().post(new GetMyInvestments.Request(getMyInvestmentsFilter(), Constants.NUM_OF_ROWS_LONG, page = 0));

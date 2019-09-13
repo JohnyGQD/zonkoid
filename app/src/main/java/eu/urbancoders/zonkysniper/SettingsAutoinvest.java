@@ -10,9 +10,9 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.ActionBar;
-import android.text.TextUtils;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.appcompat.app.ActionBar;
+
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +29,6 @@ import eu.urbancoders.zonkysniper.core.Constants;
 import eu.urbancoders.zonkysniper.core.ZonkySniperApplication;
 import eu.urbancoders.zonkysniper.dataobjects.Region;
 import eu.urbancoders.zonkysniper.events.TopicSubscription;
-import eu.urbancoders.zonkysniper.investing.AutoInvestIncomePreference;
 
 /**
  * Author: Ondrej Steger (ondrej@steger.cz)
@@ -160,6 +159,9 @@ public class SettingsAutoinvest extends AppCompatPreferenceActivity {
 
                 SwitchPreference insuredOnly = (SwitchPreference) findPreference(Constants.SHARED_PREF_AUTOINVEST_INSURED_ONLY);
                 insuredOnly.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_insured, null));
+
+                SwitchPreference moreLoansActive = (SwitchPreference) findPreference(Constants.SHARED_PREF_AUTOINVEST_ONLY_WITH_PREVIOUS_LOANS);
+                moreLoansActive.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_more_loans_active, null));
 
                 EditTextPreference maxAmount = (EditTextPreference) findPreference(Constants.SHARED_PREF_AUTOINVEST_MAX_AMOUNT);
                 maxAmount.setIcon(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_autoinvest_max_amount, null));

@@ -109,6 +109,7 @@
     <string name="income_NEXT_OTHERS">Jiné (renta, akcie …)</string>
 
     <!--Region - Kraj-->
+    <string name="region_0">kraj neuveden</string>
     <string name="region_1">Hlavní město Praha</string>
     <string name="region_2">Středočeský kraj</string>
     <string name="region_3">Jihočeský kraj</string>
@@ -137,7 +138,7 @@
     <string name="title_activity_settings_notifications_zonky">Oznámení ze Zonky</string>
     <string name="title_activity_settings_notifications_robozonky">Oznámení z RoboZonky</string>
     <string name="action_help">Nápověda</string>
-    <string name="copyright"><![CDATA["\u00a9 Urbancoders.eu, verze {0}"]]></string>
+    <string name="copyright"><![CDATA[\u00a9 Urbancoders.eu, verze {0}]]></string>
     <string name="please_upgrade">Pro investování prosím aktualizujte na nejnovější verzi.
     </string>
     <string name="title_activity_portfolio">Portfolio</string>
@@ -257,7 +258,7 @@
     <string name="radio_canBeSold">Prodatelné</string>
     <string name="my_investments_sold_for">Prodáno za</string>
     <string name="my_investments_selling_fee">Poplatek</string>
-    <string name="marketplace_filter_ratings">Zobrazit půjčky s ratingem / úrokem</string>
+    <string name="marketplace_filter_ratings">Zobrazit půjčky s úrokem</string>
     <string name="marketplace_filter_terminmonths">Zobrazit podle splatnosti (od - do)</string>
     <string name="coachmark_text">Přidali jsme filtr tržiště, abyste mohli odfiltrovat rezervované půjčky.</string>
     <string name="max_investment_info">Můžete investovat až %1$s Kč do jedné půjčky</string>
@@ -289,5 +290,8 @@
     <string name="reservedOnly">Do půjčky nelze investovat, pokud nemáte rezervaci</string>
     <string name="reservedOnlyBadge">Reservé</string>
     <string name="show_reserved">Zobrazit také rezervované</string>
+    <string name="my_investments_count">Celkový počet záznamů: %1$s</string>
+    <string name="autoinvest_only_with_previous_loans">Pouze 2. a další půjčka</string>
+    <string name="profitability">výkonnost portfolia</string>
 
 </resources>
